@@ -2163,10 +2163,10 @@ static void lcd_support_menu()
             MENU_ITEM_BACK_P(PSTR(" 03b or newer"));
             break;
        case ClFsensorPCB::_Undef:
-            MENU_ITEM_BACK_P(PSTR(" N/A"));
+            MENU_ITEM_FUNCTION_P(PSTR(" not defined"), lcd_detect_IRsensor);
             break;
        default:
-            MENU_ITEM_BACK_P(PSTR(" unknown"));
+            MENU_ITEM_FUNCTION_P(PSTR(" unknown"), lcd_detect_IRsensor);
        }
 #endif // IR_SENSOR_ANALOG
 
@@ -7538,7 +7538,7 @@ if(volt_IR_int<((int)IRsensor_Hmin_TRESHOLD))
           lcd_selftest_error(TestError::FsensorLevel,"HIGH","");
      return(false);
      }
-lcd_show_fullscreen_message_and_wait_P(_i("Please insert filament (but not load them!) into extruder and then press the knob."));
+lcd_show_fullscreen_message_and_wait_P(_i("Insert any filament into the extruder. Full load not needed. Then press the knob."));
 volt_IR_int=current_voltage_raw_IR;
 volt_IR=VOLT_DIV_REF*((float)volt_IR_int/(1023*OVERSAMPLENR));
 printf_P(PSTR("Measured filament sensor low level: %4.2fV\n"),volt_IR);
@@ -7562,16 +7562,17 @@ static void lcd_detect_IRsensor()
 bool bAction;
 
 bMenuFSDetect=true;                               // inhibits some code inside "manage_inactivity()"
-bAction=lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Is the filament unloaded?"),false,true);
-if(!bAction)
+bAction=lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Is filament loaded?"),false,false);
+//!//bAction=lcd_show_multiscreen_message_two_choices_and_wait_P(_i("Is filament loaded?"),false,true,_i("Yes (unload)"),_i("No (continue)"));
+if(bAction)
      {
-     lcd_show_fullscreen_message_and_wait_P(_i("... so unload the filament and repeat action!"));
+     lcd_show_fullscreen_message_and_wait_P(_i("... so unload filament and repeat action!"));
      return;
      }
 bAction=lcd_selftest_IRsensor(true);
 if(bAction)
-     lcd_show_fullscreen_message_and_wait_P(_i("PCB check successful - withdraw the filament now!"));
-else lcd_show_fullscreen_message_and_wait_P(_i("PCB check unsuccessful - withdraw the filament now!"));
+     lcd_show_fullscreen_message_and_wait_P(_i("Sensor type verified - remove the filament!"));
+else lcd_show_fullscreen_message_and_wait_P(_i("Sensor type not verified - remove the filament!"));
 bMenuFSDetect=false;                              // de-inhibits some code inside "manage_inactivity()"
 }
 #endif //IR_SENSOR_ANALOG
